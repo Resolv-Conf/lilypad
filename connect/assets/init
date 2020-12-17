@@ -1,0 +1,48 @@
+#!/bin/bash
+set -e
+
+LILYPAD_CONNECT_INSTALL_DIR=/opt/lilypad-connect
+LILYPAD_CONNECT_CONFIG=${LILYPAD_CONNECT_INSTALL_DIR}/connect.yml
+
+if [ ! -f /data/connect.yml ] && [ -f ${LILYPAD_CONNECT_CONFIG} ];
+then
+  cp ${LILYPAD_CONNECT_CONFIG} /data/connect.yml
+fi
+
+
+appStart () {
+  # Needs to be in a screen for now.. since GO doesn't like docker stdin
+  exec ${LILYPAD_CONNECT_INSTALL_DIR}/connect-linux-amd64
+}
+
+appHelp () {
+  echo "Available options:"
+  echo " app:start          - Starts the lilypad proxy (default)"
+  echo " app:help           - Displays the help"
+  echo " [command]          - Execute the specified linux command eg. bash."
+}
+
+
+case "$1" in
+  app:start)
+    appStart
+    ;;
+  app:help)
+    appHelp
+    ;;
+  *)
+    if [ -x $1 ]; then
+      $1
+    else
+      prog=$(which $1)
+      if [ -n "${prog}" ] ; then
+        shift 1
+        $prog $@
+      else
+        appHelp
+      fi
+    fi
+    ;;
+esac
+
+exit 0

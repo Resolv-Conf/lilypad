@@ -1,0 +1,8 @@
+bind: :5091
+logins:
+- regexp: ^proxy-.*$
+  password: dooshi5lazae0Foh
+- regexp: ^server.*$
+  password: uo0eifexi3Siesei
+- username: example
+  password: example

@@ -1,0 +1,67 @@
+#!/bin/bash
+set -e
+
+LILYPAD_PROXY_INSTALL_DIR="/opt/lilypad-proxy"
+LILYPAD_PROXY_CONFIG=${LILYPAD_PROXY_INSTALL_DIR}/proxy.yml
+
+LILYPAD_CONNECT_HOST=${LILYPAD_CONNECT_HOST:-lilypad-connect}
+LILYPAD_CONNECT_PORT=${LILYPAD_CONNECT_PORT:-5091}
+#LILYPAD_CONNECT_USER=${LILYPAD_CONNECT_USER:-proxy_1}
+#LILYPAD_CONNECT_PASS=${LILYPAD_CONNECT_PASS:-proxypass123}
+
+if [ -n "${LPCONNECT_PORT_5091_TCP_ADDR}" ]
+then
+  LILYPAD_CONNECT_HOST=${LILYPAD_CONNECT_HOST:-${LPCONNECT_PORT_5091_TCP_ADDR}}
+  LILYPAD_CONNECT_PORT=${LILYPAD_CONNECT_PORT:-${LPCONNECT_PORT_5091_TCP_PORT}}
+fi
+
+
+if [ ! -f /data/proxy.yml ]
+then
+  cp ${LILYPAD_PROXY_CONFIG} /data/proxy.yml
+fi
+
+#config stuff
+sed 's/address: lilypad-connect:5091/address: '${LILYPAD_CONNECT_HOST}':'${LILYPAD_CONNECT_PORT}'/' -i ${LILYPAD_PROXY_CONFIG}
+sed 's/address: 127.0.0.1:5091/address: '${LILYPAD_CONNECT_HOST}':'${LILYPAD_CONNECT_PORT}'/' -i ${LILYPAD_PROXY_CONFIG}
+#sed 's/username: example/username: '${LILYPAD_CONNECT_USER}'/' -i ${LILYPAD_PROXY_CONFIG}
+#sed 's/password: example/password: '${LILYPAD_CONNECT_PASS}'/' -i ${LILYPAD_PROXY_CONFIG}
+
+
+
+appStart () {
+  exec ${LILYPAD_PROXY_INSTALL_DIR}/proxy-linux-amd64
+}
+
+appHelp () {
+  echo "Available options:"
+  echo " app:start          - Starts the lilypad proxy (default)"
+  echo " app:help           - Displays the help"
+  echo " [command]          - Execute the specified linux command eg. bash."
+}
+
+
+case "$1" in
+  app:start)
+    appStart
+    ;;
+  app:help)
+    appHelp
+    ;;
+  *)
+    if [ -x $1 ]; then
+      $1
+    else
+      prog=$(which $1)
+      if [ -n "${prog}" ] ; then
+        shift 1
+        $prog $@
+      else
+        appHelp
+      fi
+    fi
+    ;;
+esac
+
+exit 0
+

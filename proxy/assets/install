@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Download and install everything from the repos.
+# Install bash and openssl
+apk --update add openssl ca-certificates go git musl-dev
+
+# Set GOPATH
+export GOPATH=/go
+
+mkdir -p /go
+go get github.com/LilyPad/GoLilyPad
+go get github.com/satori/go.uuid
+go get gopkg.in/yaml.v2
+go get github.com/klauspost/compress/zlib
+
+cd $GOPATH/src/github.com/LilyPad/GoLilyPad/server/proxy/main
+go build
+
+mkdir -p /opt/lilypad-proxy
+cp $GOPATH/src/github.com/LilyPad/GoLilyPad/server/proxy/main/main /opt/lilypad-proxy/proxy-linux-amd64
+rm -rf /go
+
+apk --purge del go git gcc
+

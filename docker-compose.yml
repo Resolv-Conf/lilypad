@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  connect:
+    restart: unless-stopped
+    build: connect/
+    stdin_open: true
+    tty: true
+    networks:
+      pterodactyl_nw:
+        aliases:
+        - connect
+        - lilypad-connect
+    volumes:
+    - ./config/connect.yml:/data/connect.yml:ro
+
+  proxy:
+    restart: unless-stopped
+    build: proxy/
+    stdin_open: true
+    tty: true
+    depends_on:
+    - connect
+    networks:
+      pterodactyl_nw:
+        aliases:
+        - proxy
+        - lilypad-proxy
+    ports:
+    - 25665:25565
+    volumes:
+    - ./config/proxy.yml:/data/proxy.yml:ro
+
+networks:
+  pterodactyl_nw:
+    external: true
